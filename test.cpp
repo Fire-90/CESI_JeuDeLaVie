@@ -20,7 +20,7 @@ private:
 
 public:
     Grid(int r, int c) : rows(r), cols(c) {
-        cells.resize(rows, vector<Cell>(cols));
+        
     }
 
     void loadFromFile(const string& fileName) {
