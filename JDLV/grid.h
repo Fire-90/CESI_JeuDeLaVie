@@ -54,18 +54,18 @@ public:
 
     //Méthode pour utiliser le fichier txt d'entrer
     virtual void loadFromFile(const string& fileName) {
-        ifstream file(fileName);
-        if (!file.is_open()) { //si le fichier ne peux pas etre ouvert
+        ifstream file(fileName); // Ouvre le fichier
+        if (!file.is_open()) { // Si le fichier ne peux pas etre ouvert
             throw runtime_error("Unable to open file");
         }
 
-        file >> rows >> cols; // lire dans le fichier les colonnes et lignes
+        file >> rows >> cols; // Lire dans le fichier les colonnes et lignes
         cells.resize(rows, vector<Cell>(cols));
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
                 int state;
-                file >> state; //lire l'etat
-                cells[i][j] = Cell(i, j, state); //ecris l'etat de la cellule depuis le fichier
+                file >> state; // Lire l'état depuis le fichier
+                cells[i][j] = Cell(i, j, state); // Écris l'etat de la cellule depuis le fichier
             }
         }
         file.close();
@@ -109,6 +109,7 @@ public:
         cout << "Données sauvegardées dans le fichier : " << fileName << "\n";
     }
 
+    // Méthodes virtuelles pures
     virtual void update() = 0;
     virtual void display() = 0;
 
@@ -121,19 +122,19 @@ public:
 
     void update() override {
         vector<vector<Cell>> nextState = cells;
-        for (int i = 0; i < rows; ++i) {
+        for (int i = 0; i < rows; ++i) { // Calculer pour chaque cellule de la grille
             for (int j = 0; j < cols; ++j) {
                 int aliveNeighbors = countAliveNeighbors(i, j);
-                nextState[i][j].SetState(Rules::determineNextState(cells[i][j], aliveNeighbors)); //Nouvelle etat de la cellule en fonction des regles
+                nextState[i][j].SetState(Rules::determineNextState(cells[i][j], aliveNeighbors)); // Nouvelle etat de la cellule en fonction des regles
             }
         }
-        cells = nextState; //Change l'etat de la cellule avec le nouvelle état
+        cells = nextState; // Change l'etat de la cellule avec le nouvelle état
     }
 
     void display() override {
         for (auto& row : cells) {
             for (auto& cell : row) {
-                cout << ((cell.GetState()==1) ? "O" : (cell.GetState()==2) ? "□" : ".") << " ";  //affichage des cellules
+                cout << ((cell.GetState()==1) ? "O" : (cell.GetState()==2) ? "□" : ".") << " ";  // Affichage des cellules dans la console
             }
             cout << "\n";
         }
@@ -144,31 +145,32 @@ public:
 class GraphicalGrid : public GridBase {
 private:
     int cellSize;
-    sf::RenderWindow window;  //permet de gerer la fenetre
+    sf::RenderWindow window;
     bool isActive;
 public:
+    //Constructeur de la grille graphique avec la librairie STML
     GraphicalGrid(int r, int c, int size): 
-        GridBase(r, c), cellSize(size), window(sf::VideoMode(c * size, r * size), "Game of Life") {} //cosntructeur, video mode construit la fenetre grille
+        GridBase(r, c), cellSize(size), window(sf::VideoMode(c * size, r * size), "Game of Life") {}
 
     void update() override {
         vector<vector<Cell>> nextState = cells;
-        for (int i = 0; i < rows; ++i) {
+        for (int i = 0; i < rows; ++i) { // Calculer l'état pour chaque cellule de la grille
             for (int j = 0; j < cols; ++j) {
                 int aliveNeighbors = countAliveNeighbors(i, j);
-                nextState[i][j].SetState(Rules::determineNextState(cells[i][j], aliveNeighbors)); //regarde autour de la cellule et determine son état en fonction des voisins
+                nextState[i][j].SetState(Rules::determineNextState(cells[i][j], aliveNeighbors)); // Regarde autour de la cellule et determine son état en fonction des voisins
             }
         }
-        cells = nextState; //met a jour l'etat de la cellule
+        cells = nextState; // Met a jour l'état de la cellule
     }
 
     void display() override {
-        window.clear(); //clear la fenetre
-        for (int i = 0; i < rows; ++i) {
+        window.clear(); // Clear la fenetre
+        for (int i = 0; i < rows; ++i) { //Pour chaque cellule
             for (int j = 0; j < cols; ++j) {
-                sf::RectangleShape rectangle(sf::Vector2f(cellSize - 1, cellSize - 1)); //créer un rectangle pour chaque cellule
-                rectangle.setPosition(j * cellSize, i * cellSize); //positionnement des cellules
-                rectangle.setFillColor((cells[i][j].GetState()==1) ? sf::Color::White : (cells[i][j].GetState()==2) ? sf::Color(128,128,128) : sf::Color::Black); //paramettre les cellules et leurs couleurs
-                window.draw(rectangle); //créer les rectangles
+                sf::RectangleShape rectangle(sf::Vector2f(cellSize - 1, cellSize - 1)); // Créer un rectangle pour chaque cellule
+                rectangle.setPosition(j * cellSize, i * cellSize); // Positionnement des cellules
+                rectangle.setFillColor((cells[i][j].GetState()==1) ? sf::Color::White : (cells[i][j].GetState()==2) ? sf::Color(128,128,128) : sf::Color::Black); // Paramètre les cellules et leurs couleurs
+                window.draw(rectangle); // Créer les rectangles
             }
         }
         window.display();
@@ -178,54 +180,55 @@ public:
         while (window.isOpen()) {
             sf::Event event;
 
-            // Gestion des événements
+            // Gestion des événements du clavier
             while (window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
+                if (event.type == sf::Event::Closed) { //Ferme la fenêtre
                     window.close();
                 }
 
-                if (event.type == sf::Event::LostFocus) {
+                if (event.type == sf::Event::LostFocus) { //Met en pause le jeu quand la fenêtre n'est pas focus
                     isActive = false;
                 }
 
-                if (event.type == sf::Event::GainedFocus) {
+                if (event.type == sf::Event::GainedFocus) { //Enlève la pause le jeu quand la fenêtre est focus
                     isActive = true;
                 }
 
                 if (event.type == sf::Event::KeyPressed) {
-                    if (event.key.code == sf::Keyboard::Space) {
-                        isActive = !isActive;  // Basculer l'état pause
+                    if (event.key.code == sf::Keyboard::Space) { // Basculer l'état pause ON/OFF avec la barre espace
+                        isActive = !isActive;
                     }
                     
-                    if (event.key.code == sf::Keyboard::Left) {
-                        time = max(0, time - 5); // Réduction du délai (minimum 1 ms)
+                    if (event.key.code == sf::Keyboard::Left) { // Réduction du délai avec la flèche gauche
+                        time = max(0, time - 5); 
                         cout << "Changed : " << time << " ms" << endl;
                     }
 
-                    if (event.key.code == sf::Keyboard::Right) {
-                        time = min(1000, time + 5); // Augmentation du délai (maximum 1000 ms)
+                    if (event.key.code == sf::Keyboard::Right) { // Augmentation du délai avec la flèche droite
+                        time = min(1000, time + 5);
                         cout << "Changed refresh rate: " << time << " ms" << endl;
                     }
                 }
+                
+                // Gestion des événements de la souris
+                if (event.type == sf::Event::MouseButtonPressed) { // Si la souris est pressé 
+                    int mouseX = event.mouseButton.x;              // Récupere la position en x de la souris
+                    int mouseY = event.mouseButton.y;              // Récupere la position en y de la souris
 
-                if (event.type == sf::Event::MouseButtonPressed) {
-                    int mouseX = event.mouseButton.x;
-                    int mouseY = event.mouseButton.y;
-
-                    int cellX = mouseY / cellSize;
-                    int cellY = mouseX / cellSize;
+                    int cellX = mouseY / cellSize;                 // Trouve les coordonnées de la cellule où pointe la souris
+                    int cellY = mouseX / cellSize;                 // CellX et CellY sont les coordonnées de la cellule
  
                     // Vérifier si la cellule existe
                     if (cellX >= 0 && cellX < rows && cellY >= 0 && cellY < cols) {
-                        // Clic gauche changer l'état d'une cellule
-                        if (event.mouseButton.button == sf::Mouse::Left) {
-                            int currentState = cells[cellX][cellY].GetState();
+                        // Clic gauche changer l'état de la cellule entre vivante ou morte (obstacle est ingoré)
+                        if (event.mouseButton.button == sf::Mouse::Left) { 
+                            int currentState = cells[cellX][cellY].GetState(); //Savoir quelle type de cellule est cliqué
                             cells[cellX][cellY].SetState((currentState == 2) ? 2 : (currentState == 1) ? 0 : 1);
-                        }
+                        }   
 
-                        // Clic droit ajouter un obstacle
+                        // Clic droit change l'état de la cellule entre morte et obstacle (vivant est ingnoré)
                         if (event.mouseButton.button == sf::Mouse::Right) {
-                            int currentState = cells[cellX][cellY].GetState();
+                            int currentState = cells[cellX][cellY].GetState(); //Savoir quelle type de cellule est cliqué
                             cells[cellX][cellY].SetState((currentState == 1) ? 1 : (currentState == 2) ? 0 : 2);
                         }
                     }
@@ -236,10 +239,9 @@ public:
             if (isActive) {
                 update();
                 
-
             this_thread::sleep_for(chrono::milliseconds(time)); //Temps entre chaque itérations
             }
-            display();
+            display(); // Mettre à jour la fenêtre
         }
     }
 };

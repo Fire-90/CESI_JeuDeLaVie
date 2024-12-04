@@ -30,7 +30,7 @@ public:
         vector<vector<int>> initialState(rows, vector<int>(cols));
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                file >> initialState[i][j]; //lis le fichier pour representer les cellules vivante et morte chcune leurs tours
+                file >> initialState[i][j]; // Lis le fichier pour representer les cellules vivante et morte chacune leurs tours
             }
         }
 
@@ -38,7 +38,7 @@ public:
         ConsoleGrid grid(rows, cols);
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                grid.getCell(i, j).SetState(initialState[i][j]); //Si cellule est vivante, initialState == 1
+                grid.getCell(i, j).SetState(initialState[i][j]); // Initialise la grille
             }
         }
 
@@ -47,7 +47,7 @@ public:
         file >> iterations;
 
         cout << "Initial state:\n";
-        grid.display();
+        grid.display(); //Affichage avant itérations
 
         // Effectuer les itérations
         for (int i = 0; i < iterations; ++i) {
@@ -55,7 +55,7 @@ public:
         }
 
         cout << "Final state after " << iterations << " iteration(s):\n";
-        grid.display();
+        grid.display(); //Affichage après itérations
 
         // Lire la grille de l'etat final
         vector<vector<int>> expectedState(rows, vector<int>(cols));
@@ -79,6 +79,7 @@ public:
             }
         }
 
+        // Afficher le résultat du test
         if (passed) {
             cout << "Test passed: " << fileName << endl;
         } else {
