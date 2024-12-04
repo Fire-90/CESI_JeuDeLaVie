@@ -1,6 +1,8 @@
+//Importation des classes en fichier .h
 #ifndef UNITTEST_H
 #define UNITTEST_H
 
+//Importation des libraries
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -36,7 +38,7 @@ public:
         ConsoleGrid grid(rows, cols);
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                grid.getCell(i, j).alive = (initialState[i][j] == 1); //Si cellule est vivante, initialState == 1
+                grid.getCell(i, j).SetState(initialState[i][j]); //Si cellule est vivante, initialState == 1
             }
         }
 
@@ -67,11 +69,11 @@ public:
         bool passed = true;
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                if (grid.getCell(i, j).alive != (expectedState[i][j] == 1)) {       //si false alors :
+                if (grid.getCell(i, j).GetState() != (expectedState[i][j])) {       //si false alors :
                     passed = false;
-                    cerr << "Error at cell (" << i << ", " << j << "): "       //Quel cellule
+                    cerr << "Error at cell (" << i << ", " << j << "): "            //Quel cellule
                               << "Expected " << expectedState[i][j]                 //Resultat attendu
-                              << ", Found " << (grid.getCell(i, j).alive ? 1 : 0)   //Resultat obtenu
+                              << ", Found " << (grid.getCell(i, j).GetState())      //Resultat obtenu
                               << endl;
                 }
             }

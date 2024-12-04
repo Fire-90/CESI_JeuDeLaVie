@@ -3,12 +3,24 @@
 
 // Class Cell
 class Cell {
-public:
-    bool alive;
+protected:
+    int state;
     int x, y;
 
-    Cell(int x = 0, int y = 0, bool state = false)
-        : x(x), y(y), alive(state) {}
+public:
+    //Constructeur de la classe
+    Cell(int x = 0, int y = 0, int state = false):
+        x(x), y(y), state(state){}
+    
+    //Getteur de l'état de la cellule
+    int GetState() {
+        return state;
+    }
+
+    //Setteur de l'état de la cellule
+    void SetState(int newstate) {
+        state=newstate;
+    }
 };
 
 #endif

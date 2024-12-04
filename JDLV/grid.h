@@ -13,16 +13,16 @@ protected:
     vector<vector<Cell>> cells;
     int rows, cols;
 
-    int countAliveNeighbors(int x, int y) const {  // compte les cellules voisines vivantes
+    int countAliveNeighbors(int x, int y) {  // Compte les cellules voisines vivantes
         int count = 0;
-        for (int dx = -1; dx <= 1; ++dx) {         // permet de se reperer et faire le tour des voisines
+        for (int dx = -1; dx <= 1; ++dx) {         // Permet de se reperer et faire le tour des voisines
             for (int dy = -1; dy <= 1; ++dy) {
-                if (dx == 0 && dy == 0) continue;  // Ignore la cellule du milieu
+                if (dx == 0 && dy == 0) continue;  // Ignorer la cellule du milieu
 
-                int nx = (x + dx + rows) % rows;   // Gestion de la grille torique
+                int nx = (x + dx + rows) % rows;   // Grille torique
                 int ny = (y + dy + cols) % cols; 
 
-                if (cells[nx][ny].alive) {
+                if (cells[nx][ny].GetState() == 1) { //Compter si la cellule est vivante
                     count++;
                 }
             }
@@ -33,14 +33,14 @@ protected:
 public:
     // Getter pour accéder à une cellule spécifique
     Cell& getCell(int x, int y) {
-        if (x < 0 || x >= rows || y < 0 || y >= cols) {
+        if (x < 0 || x >= rows || y < 0 || y >= cols) { //retrouve la cellule choisi
             throw out_of_range("Cell indices are out of range.");
         }
         return cells[x][y];
     }
 
     //Constructeur de la grille
-    GridBase(int r, int c) : rows(r), cols(c) {
+    GridBase(int r, int c) : rows(r), cols(c) { 
         cells.resize(rows, vector<Cell>(cols));
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
@@ -65,7 +65,7 @@ public:
             for (int j = 0; j < cols; ++j) {
                 int state;
                 file >> state; //lire l'etat
-                cells[i][j] = Cell(i, j, state == 1); //ecris l'etat de la cellule depuis le fichier
+                cells[i][j] = Cell(i, j, state); //ecris l'etat de la cellule depuis le fichier
             }
         }
         file.close();
@@ -77,7 +77,7 @@ public:
     }
 
     // Méthode pour sauvegarder une itération dans un fichier
-    void saveToFile(const string& baseFileName, int iteration) const {
+    void saveToFile(const string& baseFileName, int iteration) {
         // Générer le nom du dossier
         string folderName = generateFolderName(baseFileName);
 
@@ -97,9 +97,9 @@ public:
         }
 
         // Écrire les données dans le fichier
-        for (const auto& row : cells) {
-            for (const auto& cell : row) {
-                file << (cell.alive ? 1 : 0) << " ";  // 1 si vivante, 0 si morte
+        for (auto& row : cells) {
+            for (auto& cell : row) {
+                file << cell.GetState() << " ";  // 1 si vivante, 0 si morte
             }
             file << "\n";
         }
@@ -124,16 +124,16 @@ public:
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
                 int aliveNeighbors = countAliveNeighbors(i, j);
-                nextState[i][j].alive = Rules::determineNextState(cells[i][j], aliveNeighbors); //Nouvelle etat de la cellule en fonction des regles
+                nextState[i][j].SetState(Rules::determineNextState(cells[i][j], aliveNeighbors)); //Nouvelle etat de la cellule en fonction des regles
             }
         }
         cells = nextState; //Change l'etat de la cellule avec le nouvelle état
     }
 
     void display() override {
-        for (const auto& row : cells) {
-            for (const auto& cell : row) {
-                cout << (cell.alive ? "O" : ".") << " "; //affichage des cellules
+        for (auto& row : cells) {
+            for (auto& cell : row) {
+                cout << ((cell.GetState()==1) ? "O" : (cell.GetState()==2) ? "□" : ".") << " ";  //affichage des cellules
             }
             cout << "\n";
         }
@@ -144,31 +144,31 @@ public:
 class GraphicalGrid : public GridBase {
 private:
     int cellSize;
-    sf::RenderWindow window;
-
+    sf::RenderWindow window;  //permet de gerer la fenetre
+    bool isActive;
 public:
     GraphicalGrid(int r, int c, int size): 
-        GridBase(r, c), cellSize(size), window(sf::VideoMode(c * size, r * size), "Game of Life") {}
+        GridBase(r, c), cellSize(size), window(sf::VideoMode(c * size, r * size), "Game of Life") {} //cosntructeur, video mode construit la fenetre grille
 
     void update() override {
         vector<vector<Cell>> nextState = cells;
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
                 int aliveNeighbors = countAliveNeighbors(i, j);
-                nextState[i][j].alive = Rules::determineNextState(cells[i][j], aliveNeighbors);
+                nextState[i][j].SetState(Rules::determineNextState(cells[i][j], aliveNeighbors)); //regarde autour de la cellule et determine son état en fonction des voisins
             }
         }
-        cells = nextState;
+        cells = nextState; //met a jour l'etat de la cellule
     }
 
     void display() override {
-        window.clear();
+        window.clear(); //clear la fenetre
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                sf::RectangleShape rectangle(sf::Vector2f(cellSize - 1, cellSize - 1));
-                rectangle.setPosition(j * cellSize, i * cellSize);
-                rectangle.setFillColor(cells[i][j].alive ? sf::Color::Green : sf::Color::Black);
-                window.draw(rectangle);
+                sf::RectangleShape rectangle(sf::Vector2f(cellSize - 1, cellSize - 1)); //créer un rectangle pour chaque cellule
+                rectangle.setPosition(j * cellSize, i * cellSize); //positionnement des cellules
+                rectangle.setFillColor((cells[i][j].GetState()==1) ? sf::Color::White : (cells[i][j].GetState()==2) ? sf::Color(128,128,128) : sf::Color::Black); //paramettre les cellules et leurs couleurs
+                window.draw(rectangle); //créer les rectangles
             }
         }
         window.display();
@@ -177,14 +177,69 @@ public:
     void run(int time) {
         while (window.isOpen()) {
             sf::Event event;
+
+            // Gestion des événements
             while (window.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
                     window.close();
                 }
+
+                if (event.type == sf::Event::LostFocus) {
+                    isActive = false;
+                }
+
+                if (event.type == sf::Event::GainedFocus) {
+                    isActive = true;
+                }
+
+                if (event.type == sf::Event::KeyPressed) {
+                    if (event.key.code == sf::Keyboard::Space) {
+                        isActive = !isActive;  // Basculer l'état pause
+                    }
+                    
+                    if (event.key.code == sf::Keyboard::Left) {
+                        time = max(0, time - 5); // Réduction du délai (minimum 1 ms)
+                        cout << "Changed : " << time << " ms" << endl;
+                    }
+
+                    if (event.key.code == sf::Keyboard::Right) {
+                        time = min(1000, time + 5); // Augmentation du délai (maximum 1000 ms)
+                        cout << "Changed refresh rate: " << time << " ms" << endl;
+                    }
+                }
+
+                if (event.type == sf::Event::MouseButtonPressed) {
+                    int mouseX = event.mouseButton.x;
+                    int mouseY = event.mouseButton.y;
+
+                    int cellX = mouseY / cellSize;
+                    int cellY = mouseX / cellSize;
+ 
+                    // Vérifier si la cellule existe
+                    if (cellX >= 0 && cellX < rows && cellY >= 0 && cellY < cols) {
+                        // Clic gauche changer l'état d'une cellule
+                        if (event.mouseButton.button == sf::Mouse::Left) {
+                            int currentState = cells[cellX][cellY].GetState();
+                            cells[cellX][cellY].SetState((currentState == 2) ? 2 : (currentState == 1) ? 0 : 1);
+                        }
+
+                        // Clic droit ajouter un obstacle
+                        if (event.mouseButton.button == sf::Mouse::Right) {
+                            int currentState = cells[cellX][cellY].GetState();
+                            cells[cellX][cellY].SetState((currentState == 1) ? 1 : (currentState == 2) ? 0 : 2);
+                        }
+                    }
+                }
+            }
+
+            // Mise à jour en fonction de isActive
+            if (isActive) {
+                update();
+                
+
+            this_thread::sleep_for(chrono::milliseconds(time)); //Temps entre chaque itérations
             }
             display();
-            update();
-            this_thread::sleep_for(chrono::milliseconds(time));
         }
     }
 };
