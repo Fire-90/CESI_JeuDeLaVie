@@ -39,8 +39,11 @@ public:
         } else if (mode == 2) { //Choix du mode Graphique
             int input;
             int size;
+            int cell;
             cout << "Enter time between iterations (in milliseconds): "; //Demande le temps entre chaque itérations à l'utilisateur
             cin >> input;
+            //cout << "Enter cell size (in pixel): "; //Demande la taille d'une cellule
+            //cin >> cell;
             cout << "Enter size of the squared window (in number of cells): "; //Demande la taille de la fenêtre à l'utilisateur
             cin >> size;
 

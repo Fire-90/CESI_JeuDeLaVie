@@ -164,12 +164,12 @@ public:
     }
 
     void display() override {
-        window.clear(); // Clear la fenetre
+        window.clear(sf::Color(40,40,40)); // Clear la fenetre
         for (int i = 0; i < rows; ++i) { //Pour chaque cellule
             for (int j = 0; j < cols; ++j) {
                 sf::RectangleShape rectangle(sf::Vector2f(cellSize - 1, cellSize - 1)); // Créer un rectangle pour chaque cellule
                 rectangle.setPosition(j * cellSize, i * cellSize); // Positionnement des cellules
-                rectangle.setFillColor((cells[i][j].GetState()==1) ? sf::Color::White : (cells[i][j].GetState()==2) ? sf::Color(128,128,128) : sf::Color::Black); // Paramètre les cellules et leurs couleurs
+                rectangle.setFillColor((cells[i][j].GetState()==1) ? sf::Color(255,255,255) : (cells[i][j].GetState()==2) ? sf::Color(255,0,0) : sf::Color(0,0,0)); // Paramètre les cellules et leurs couleurs
                 window.draw(rectangle); // Créer les rectangles
             }
         }
