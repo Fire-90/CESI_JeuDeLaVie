@@ -16,6 +16,6 @@ sudo ./main.exe <nom_de_fichier.txt>
 ```
 Ou pour un test unitaire : 
 ```shell
-sudo ./main.exe test <nom_de_fichier.txt>`
+sudo ./main.exe test <nom_de_fichier.txt>
 ```
 Vous pouvez maintenant suivre les instructions du programme qui vous guidera.
